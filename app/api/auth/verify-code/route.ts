@@ -34,14 +34,18 @@ export async function POST(req: Request) {
   });
 
   // 3) Cookie setzen (damit /app freigeschaltet ist)
+  
   const res = NextResponse.json({ ok: true });
-  res.cookies.set("hh_access", data.id, {
-    httpOnly: true,
-    secure: false, // lokal ok; später auf Vercel stellen wir das auf true
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
+  const isProd = process.env.NODE_ENV === "production";
+
+res.cookies.set("hh_access", data.id, {
+  httpOnly: true,
+  secure: isProd,
+  sameSite: "lax",
+  path: "/",
+  maxAge: 60 * 60 * 24 * 30,
+});
+
 
   return res;
 }
