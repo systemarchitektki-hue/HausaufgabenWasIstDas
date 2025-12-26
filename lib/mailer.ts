@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import { sendAccessEmail as sendAccessEmailSmtp } from "@/lib/mailer";
 
 function env(name: string) {
   const v = process.env[name];
