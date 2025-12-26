@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../../lib/supabaseAdmin";
+export const runtime = "nodejs";
 
 function randomCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -10,15 +11,17 @@ function randomCode() {
 
 export async function POST(req: Request) {
   try {
-    const secret = req.headers.get("x-webhook-secret") || "";
+    const url = new URL(req.url);
 
-    if (!process.env.WEBHOOK_SECRET) {
-      return NextResponse.json({ ok: false, error: "WEBHOOK_SECRET fehlt" }, { status: 500 });
-    }
-    if (secret !== process.env.WEBHOOK_SECRET) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-    }
+// Secret kommt entweder aus Header (Make) ODER aus URL (Digistore)
+const secret =
+  req.headers.get("x-webhook-secret") ||
+  url.searchParams.get("secret") ||
+  "";
 
+if (!process.env.WEBHOOK_SECRET || secret !== process.env.WEBHOOK_SECRET) {
+  return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+}
     const body = await req.json();
     const email = String(body.email || "").trim().toLowerCase();
     const orderId = body.order_id ? String(body.order_id) : null;
